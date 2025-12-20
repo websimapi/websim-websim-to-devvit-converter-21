@@ -18,6 +18,16 @@ function walk(dir, callback) {
   });
 }
 
+console.log('🔍 Verifying Project Integrity...');
+
+const SERVER_BUILD = './dist/server/index.cjs';
+if (!fs.existsSync(SERVER_BUILD)) {
+    console.warn('⚠️  Server build missing at ' + SERVER_BUILD);
+    console.warn('   The app might fail to upload. Check "npm run build:server" output.');
+} else {
+    console.log('✅ Server build found.');
+}
+
 console.log('🔍 Verifying Webroot Integrity...');
 
 if (!fs.existsSync(WEBROOT)) {
