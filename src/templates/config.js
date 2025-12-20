@@ -151,15 +151,17 @@ export const tsConfig = JSON.stringify({
 export const generateServerViteConfig = () => `
 import { defineConfig } from 'vite';
 import { builtinModules } from 'node:module';
+import path from 'node:path';
 
 export default defineConfig({
+  root: process.cwd(), // Ensure root is the project root, not config file location
   ssr: {
     noExternal: true,
   },
   build: {
     ssr: 'src/server/index.js',
     outDir: 'dist/server',
-    target: 'node22',
+    target: 'node20', // Use node20 for broader compatibility
     sourcemap: true,
     emptyOutDir: true,
     rollupOptions: {

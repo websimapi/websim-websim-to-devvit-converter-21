@@ -22,10 +22,19 @@ console.log('🔍 Verifying Project Integrity...');
 
 const SERVER_BUILD = './dist/server/index.cjs';
 if (!fs.existsSync(SERVER_BUILD)) {
-    console.warn('⚠️  Server build missing at ' + SERVER_BUILD);
-    console.warn('   The app might fail to upload. Check "npm run build:server" output.');
+    console.error('❌ Server build missing at ' + SERVER_BUILD);
+    console.error('   Expected: dist/server/index.cjs');
+    if (fs.existsSync('./dist')) {
+        console.log('   Contents of ./dist:', fs.readdirSync('./dist'));
+        if (fs.existsSync('./dist/server')) {
+             console.log('   Contents of ./dist/server:', fs.readdirSync('./dist/server'));
+        }
+    } else {
+        console.log('   Folder ./dist does not exist.');
+    }
+    console.error('   The app will fail to upload. Check "npm run build:server" output.');
 } else {
-    console.log('✅ Server build found.');
+    console.log('✅ Server build found at dist/server/index.cjs');
 }
 
 console.log('🔍 Verifying Webroot Integrity...');
@@ -189,6 +198,17 @@ try {
 console.log('🔨 Building Project...');
 try {
     execSync('npm run build', { stdio: 'inherit' });
+    
+    // Verify build output immediately
+    if (!fs.existsSync('dist/server/index.cjs')) {
+        console.error('❌ Server build file not found after build!');
+        console.log('   Checking dist folder structure...');
+        try {
+            const ls = execSync('ls -R dist').toString();
+            console.log(ls);
+        } catch(e) { console.log('   (Could not list dist folder)'); }
+        process.exit(1);
+    }
 } catch(e) {
     console.error('❌ Build failed!');
     process.exit(1);
