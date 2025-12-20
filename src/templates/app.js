@@ -1,9 +1,16 @@
-export const getServerDbJs = () => `
-import { redis, reddit } from '@devvit/web/server';
+export const getServerMainJs = (title) => {
+    const safeTitle = title.replace(/'/g, "\\'");
+    return `
+import express from 'express';
+import { createServer, context, redis, reddit } from '@devvit/web/server';
 
-export const DB_REGISTRY_KEY = 'sys:registry';
+const app = express();
+app.use(express.json());
 
-export async function fetchAllData() {
+// --- Database Helper ---
+const DB_REGISTRY_KEY = 'sys:registry';
+
+async function fetchAllData() {
     try {
         const collections = await redis.zRange(DB_REGISTRY_KEY, 0, -1);
         const dbData = {};
@@ -47,24 +54,17 @@ export async function fetchAllData() {
         return { dbData: {}, user: null };
     }
 }
-`;
 
-export const getServerInitJs = () => `
-import { fetchAllData } from './db.js';
+// --- Routes ---
 
-export default async function (req, res) {
+app.get('/init', async (req, res) => {
     const data = await fetchAllData();
     res.json(data);
-}
-`;
+});
 
-export const getServerSaveJs = () => `
-import { redis } from '@devvit/web/server';
-import { DB_REGISTRY_KEY } from './db.js';
-
-export default async function (req, res) {
+app.post('/save', async (req, res) => {
     try {
-        const { collection, key, value } = await req.json();
+        const { collection, key, value } = req.body;
         await redis.hSet(collection, { [key]: JSON.stringify(value) });
         await redis.zAdd(DB_REGISTRY_KEY, { member: collection, score: Date.now() });
         res.json({ success: true, collection, key });
@@ -72,54 +72,38 @@ export default async function (req, res) {
         console.error('DB Save Error:', e);
         res.status(500).json({ error: e.message });
     }
-}
-`;
+});
 
-export const getServerLoadJs = () => `
-import { redis } from '@devvit/web/server';
-
-export default async function (req, res) {
+app.post('/load', async (req, res) => {
     try {
-        const { collection, key } = await req.json();
+        const { collection, key } = req.body;
         const value = await redis.hGet(collection, key);
         res.json({ collection, key, value: value ? JSON.parse(value) : null });
     } catch(e) {
         console.error('DB Get Error:', e);
         res.status(500).json({ error: e.message });
     }
-}
-`;
+});
 
-export const getServerDeleteJs = () => `
-import { redis } from '@devvit/web/server';
-
-export default async function (req, res) {
+app.post('/delete', async (req, res) => {
     try {
-        const { collection, key } = await req.json();
+        const { collection, key } = req.body;
         await redis.hDel(collection, [key]);
         res.json({ success: true, collection, key });
     } catch(e) {
         console.error('DB Delete Error:', e);
         res.status(500).json({ error: e.message });
     }
-}
-`;
+});
 
-export const getServerOnInstallJs = () => `
-// Maps to /internal/onInstall
-export default async function (req, res) {
+// Internal Handlers
+
+app.post('/internal/onInstall', async (req, res) => {
     console.log('App installed!');
     res.json({ success: true });
-}
-`;
+});
 
-export const getServerCreatePostJs = (title) => {
-    const safeTitle = title.replace(/'/g, "\\'");
-    return `
-import { context, reddit } from '@devvit/web/server';
-
-// Maps to /internal/createPost
-export default async function (req, res) {
+app.post('/internal/createPost', async (req, res) => {
     console.log('Creating game post...');
     try {
         const { subredditName } = context;
@@ -145,7 +129,10 @@ export default async function (req, res) {
         console.error('Failed to create post:', e);
         res.status(500).json({ error: e.message });
     }
-}
+});
+
+const server = createServer(app);
+export default server;
 `;
 };
 

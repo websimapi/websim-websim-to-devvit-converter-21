@@ -16,6 +16,7 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
     "@devvit/kit": "latest",
     "@devvit/web": "latest",
     "@devvit/redis": "latest",
+    "express": "^4.18.2",
     ...dependencies
   },
   "devDependencies": {
@@ -33,6 +34,9 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
 export const generateDevvitJson = (slug) => JSON.stringify({
   "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
   "name": slug,
+  "server": {
+    "entry": "src/server/index.js"
+  },
   "post": {
     "dir": "webroot",
     "entrypoints": {
@@ -42,7 +46,6 @@ export const generateDevvitJson = (slug) => JSON.stringify({
       }
     }
   },
-  // "server" block removed to enable default file-system routing (src/server/)
   "permissions": {
     "redis": true,
     "reddit": true
