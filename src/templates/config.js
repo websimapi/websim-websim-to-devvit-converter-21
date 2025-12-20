@@ -153,13 +153,14 @@ import { defineConfig } from 'vite';
 import { builtinModules } from 'node:module';
 
 export default defineConfig({
+  root: 'src/server', // Ensure Vite looks for index.js in src/server/
   ssr: {
     noExternal: true,
   },
   build: {
     ssr: 'index.js',
     outDir: '../../dist/server',
-    target: 'node20',
+    target: 'node22',
     sourcemap: true,
     emptyOutDir: true,
     rollupOptions: {
