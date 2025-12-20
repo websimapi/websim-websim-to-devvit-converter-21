@@ -130,7 +130,8 @@ export const tsConfig = JSON.stringify({
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "allowJs": true
   },
   "include": [
     "src"
@@ -147,7 +148,7 @@ export default defineConfig({
     noExternal: true,
   },
   build: {
-    ssr: 'src/server/index.js',
+    ssr: 'src/server/index.ts',
     outDir: 'dist/server',
     target: 'node20',
     sourcemap: true,

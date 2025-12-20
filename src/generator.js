@@ -140,7 +140,17 @@ export { Player } from '@remotion/player';
     // 4. Source Code (Devvit Main.tsx) - REMOVED (Defined in devvit.json entrypoints)
 
     // 5. Server Code (Redis/API) - Express Server
-    zip.file("src/server/index.js", getServerMainJs(projectTitle));
+    // We use .ts to satisfy Devvit CLI expectations, though content is valid JS.
+    zip.file("src/server/index.ts", getServerMainJs(projectTitle));
+    
+    // Dummy main.tsx to satisfy Devvit CLI default resolution if devvit.yaml is missed or defaults are forced
+    zip.file("src/main.tsx", `
+import { Devvit } from '@devvit/public-api';
+// This file is a placeholder to satisfy the CLI's requirement for a main entry point.
+// The actual app logic is in src/server/index.ts (Server) and webroot/ (Client).
+export default Devvit;
+    `.trim());
+
     zip.file("vite.server.config.js", generateServerViteConfig());
 
     // Note: 'webroot' folder is not created here, it will be created by 'npm run build:client' inside the user's project.
