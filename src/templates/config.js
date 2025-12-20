@@ -6,6 +6,8 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
   "scripts": {
     "dev": "devvit playtest",
     "build:client": "NODE_ENV=production vite build",
+    "build:server": "vite build -c src/server/vite.config.js",
+    "build": "npm run build:server && npm run build:client",
     "setup": "node scripts/setup.js", 
     "register": "devvit upload",
     "upload": "devvit upload",
@@ -35,7 +37,7 @@ export const generateDevvitJson = (slug) => JSON.stringify({
   "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
   "name": slug,
   "server": {
-    "entry": "src/server/index.js"
+    "entry": "dist/server/index.cjs"
   },
   "post": {
     "dir": "webroot",
@@ -145,4 +147,30 @@ export const tsConfig = JSON.stringify({
     "src"
   ]
 }, null, 2);
+
+export const generateServerViteConfig = () => `
+import { defineConfig } from 'vite';
+import { builtinModules } from 'node:module';
+
+export default defineConfig({
+  ssr: {
+    noExternal: true,
+  },
+  build: {
+    ssr: 'index.js',
+    outDir: '../../dist/server',
+    target: 'node20',
+    sourcemap: true,
+    emptyOutDir: true,
+    rollupOptions: {
+      external: [...builtinModules],
+      output: {
+        format: 'cjs',
+        entryFileNames: 'index.cjs',
+        inlineDynamicImports: true,
+      },
+    },
+  },
+});
+`;
 

@@ -8,6 +8,7 @@ import {
     generatePackageJson,
     generateDevvitJson,
     generateViteConfig,
+    generateServerViteConfig,
     tsConfig,
     getServerMainJs,
     simpleLoggerJs,
@@ -140,6 +141,7 @@ export { Player } from '@remotion/player';
 
     // 5. Server Code (Redis/API) - Express Server
     zip.file("src/server/index.js", getServerMainJs(projectTitle));
+    zip.file("src/server/vite.config.js", generateServerViteConfig());
 
     // Note: 'webroot' folder is not created here, it will be created by 'npm run build:client' inside the user's project.
     

@@ -175,10 +175,10 @@ try {
     console.warn('   If the build fails, try running "npm install" manually.');
 }
 
-// 3. Build Client (Vite)
-console.log('🔨 Building Game Client...');
+// 3. Build Project (Server & Client)
+console.log('🔨 Building Project...');
 try {
-    execSync('npm run build:client', { stdio: 'inherit' });
+    execSync('npm run build', { stdio: 'inherit' });
 } catch(e) {
     console.error('❌ Build failed!');
     process.exit(1);
