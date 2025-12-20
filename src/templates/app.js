@@ -116,14 +116,14 @@ export default async function (req, res) {
 export const getServerCreatePostJs = (title) => {
     const safeTitle = title.replace(/'/g, "\\'");
     return `
-import { reddit, context } from '@devvit/web/server';
+import { context, reddit } from '@devvit/web/server';
 
 // Maps to /internal/createPost
 export default async function (req, res) {
     console.log('Creating game post...');
     try {
         const { subredditName } = context;
-        
+
         if (!subredditName) {
             throw new Error('Could not determine subreddit from context');
         }
@@ -136,7 +136,7 @@ export default async function (req, res) {
                 text: 'Play this game built with WebSim!'
             }
         });
-        
+
         res.json({
             showToast: { text: 'Game post created!' },
             navigateTo: post
