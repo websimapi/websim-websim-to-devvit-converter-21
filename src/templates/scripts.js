@@ -209,6 +209,17 @@ try {
         } catch(e) { console.log('   (Could not list dist folder)'); }
         process.exit(1);
     }
+
+    // Verify Config
+    if (fs.existsSync('devvit.yaml')) {
+        const yaml = fs.readFileSync('devvit.yaml', 'utf8');
+        if (!yaml.includes('dist/server/index.cjs')) {
+             console.warn('⚠️  devvit.yaml might have incorrect server entry path.');
+        }
+    } else {
+        console.warn('⚠️  devvit.yaml not found (Did you mean to use YAML?)');
+    }
+
 } catch(e) {
     console.error('❌ Build failed!');
     process.exit(1);

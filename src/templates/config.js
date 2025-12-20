@@ -6,7 +6,7 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
   "scripts": {
     "dev": "devvit playtest",
     "build:client": "NODE_ENV=production vite build",
-    "build:server": "vite build -c src/server/vite.config.js",
+    "build:server": "vite build -c vite.server.config.js",
     "build": "npm run build:server && npm run build:client",
     "setup": "node scripts/setup.js", 
     "register": "devvit upload",
@@ -33,39 +33,28 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
   }
 }, null, 2);
 
-export const generateDevvitJson = (slug) => JSON.stringify({
-  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
-  "name": slug,
-  "server": {
-    "entry": "dist/server/index.cjs"
-  },
-  "post": {
-    "dir": "webroot",
-    "entrypoints": {
-      "default": {
-        "entry": "index.html",
-        "height": "tall"
-      }
-    }
-  },
-  "permissions": {
-    "redis": true,
-    "reddit": true
-  },
-  "triggers": {
-    "onAppInstall": "/internal/onInstall"
-  },
-  "menu": {
-    "items": [
-      {
-        "label": "Add Game Post",
-        "location": "subreddit",
-        "forUserType": "moderator",
-        "endpoint": "/internal/createPost"
-      }
-    ]
-  }
-}, null, 2);
+export const generateDevvitYaml = (slug) => `name: ${slug}
+version: 0.1.0
+server:
+  entry: dist/server/index.cjs
+post:
+  dir: webroot
+  entrypoints:
+    default:
+      entry: index.html
+      height: tall
+permissions:
+  redis: true
+  reddit: true
+triggers:
+  onAppInstall: /internal/onInstall
+menu:
+  items:
+    - label: Add Game Post
+      location: subreddit
+      forUserType: moderator
+      endpoint: /internal/createPost
+`;
 
 export const generateViteConfig = ({ hasReact = false, hasRemotion = false } = {}) => `
 import { defineConfig } from 'vite';
@@ -151,17 +140,16 @@ export const tsConfig = JSON.stringify({
 export const generateServerViteConfig = () => `
 import { defineConfig } from 'vite';
 import { builtinModules } from 'node:module';
-import path from 'node:path';
 
 export default defineConfig({
-  root: process.cwd(), // Ensure root is the project root, not config file location
+  root: '.',
   ssr: {
     noExternal: true,
   },
   build: {
     ssr: 'src/server/index.js',
     outDir: 'dist/server',
-    target: 'node20', // Use node20 for broader compatibility
+    target: 'node20',
     sourcemap: true,
     emptyOutDir: true,
     rollupOptions: {

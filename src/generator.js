@@ -6,7 +6,7 @@ import {
 
 import {
     generatePackageJson,
-    generateDevvitJson,
+    generateDevvitYaml,
     generateViteConfig,
     generateServerViteConfig,
     tsConfig,
@@ -92,7 +92,7 @@ export async function generateDevvitZip(projectMeta, assets, includeReadme = tru
     }
 
     zip.file("package.json", generatePackageJson(projectSlug, analyzer.dependencies, extraDevDeps));
-    zip.file("devvit.json", generateDevvitJson(projectSlug));
+    zip.file("devvit.yaml", generateDevvitYaml(projectSlug));
     zip.file("vite.config.js", generateViteConfig({ hasReact, hasRemotion }));
     zip.file("tsconfig.json", tsConfig);
     zip.file(".gitignore", "node_modules\n.devvit\nwebroot/assets"); // Ignore build artifacts if needed
@@ -141,7 +141,7 @@ export { Player } from '@remotion/player';
 
     // 5. Server Code (Redis/API) - Express Server
     zip.file("src/server/index.js", getServerMainJs(projectTitle));
-    zip.file("src/server/vite.config.js", generateServerViteConfig());
+    zip.file("vite.server.config.js", generateServerViteConfig());
 
     // Note: 'webroot' folder is not created here, it will be created by 'npm run build:client' inside the user's project.
     
