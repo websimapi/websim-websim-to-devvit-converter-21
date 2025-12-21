@@ -5,8 +5,8 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
   "type": "module",
   "scripts": {
     "dev": "devvit playtest",
-    "build:client": "NODE_ENV=production vite build",
-    "build:server": "vite build -c vite.server.config.js",
+    "build:client": "cd src/client && vite build",
+    "build:server": "cd src/server && vite build",
     "build": "npm run build:server && npm run build:client",
     "setup": "node scripts/setup.js", 
     "register": "devvit upload",
@@ -36,9 +36,10 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
 export const generateDevvitYaml = (slug) => `name: ${slug}
 version: 0.0.1
 server:
-  entry: dist/main.cjs
+  dir: dist/server
+  entry: index.cjs
 post:
-  dir: webroot
+  dir: dist/client
   entrypoints:
     default:
       entry: index.html
@@ -56,13 +57,12 @@ menu:
       endpoint: /internal/createPost
 `;
 
-export const generateViteConfig = ({ hasReact = false, hasRemotion = false } = {}) => `
+export const generateClientViteConfig = ({ hasReact = false, hasRemotion = false } = {}) => `
 import { defineConfig } from 'vite';
 ${hasReact ? "import react from '@vitejs/plugin-react';" : ""}
 
 export default defineConfig({
   mode: 'production',
-  root: 'client',
   base: './',
   plugins: [
     ${hasReact ? `react({
@@ -91,7 +91,7 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.mp3', '**/*.wav', '**/*.ogg', '**/*.glb', '**/*.gltf', '**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif'],
   build: {
-    outDir: '../webroot',
+    outDir: '../../dist/client',
     emptyOutDir: true,
     target: 'es2020', // Ensure broad compatibility without unsafe polyfills
     minify: 'esbuild', 
@@ -143,21 +143,20 @@ import { defineConfig } from 'vite';
 import { builtinModules } from 'node:module';
 
 export default defineConfig({
-  root: '.',
   ssr: {
     noExternal: true,
   },
   build: {
-    ssr: 'src/main.ts',
-    outDir: 'dist',
-    target: 'node20',
+    ssr: 'index.ts',
+    outDir: '../../dist/server',
+    target: 'node22',
     sourcemap: true,
     emptyOutDir: true,
     rollupOptions: {
       external: [...builtinModules],
       output: {
         format: 'cjs',
-        entryFileNames: 'main.cjs',
+        entryFileNames: 'index.cjs',
         inlineDynamicImports: true,
       },
     },
