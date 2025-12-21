@@ -37,7 +37,7 @@ Converted from WebSim: ${url}
 │       └── vite.config.ts
 ├── dist/                # Build output (generated)
 │   ├── client/          # Built web view files
-│   └── server/          # Built server (index.cjs)
+│   └── server/          # Server build artifact (for validation)
 ├── scripts/             # Build and validation scripts
 ├── devvit.json          # Devvit configuration
 └── package.json

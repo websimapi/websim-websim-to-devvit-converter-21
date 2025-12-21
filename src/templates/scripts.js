@@ -198,12 +198,9 @@ try {
     
     // Verify build output immediately
     if (!fs.existsSync('dist/server/index.cjs')) {
-        console.error('❌ Server build file not found after build!');
-        console.log('   Checking dist folder structure...');
-        try {
-            const ls = execSync('ls -R dist').toString();
-            console.log(ls);
-        } catch(e) { console.log('   (Could not list dist folder)'); }
+        console.error('❌ Server build validation failed!');
+        console.log('   The local build (npm run build:server) failed to produce output.');
+        console.log('   This usually means there is a syntax error in the server code.');
         process.exit(1);
     }
 

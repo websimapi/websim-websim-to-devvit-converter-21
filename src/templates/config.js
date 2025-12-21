@@ -46,7 +46,7 @@ export const generateDevvitJson = (slug) => JSON.stringify({
     }
   },
   "server": {
-    "entry": "dist/server/index.cjs"
+    "entry": "src/server/index.ts"
   },
   "permissions": {
     "redis": true,
