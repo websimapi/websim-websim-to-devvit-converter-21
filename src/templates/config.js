@@ -36,10 +36,6 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
 export const generateDevvitJson = (slug) => JSON.stringify({
   "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
   "name": slug,
-  "server": {
-    "dir": "dist/server",
-    "entry": "index.cjs"
-  },
   "post": {
     "dir": "dist/client",
     "entrypoints": {
@@ -49,9 +45,15 @@ export const generateDevvitJson = (slug) => JSON.stringify({
       }
     }
   },
+  "server": {
+    "entry": "dist/server/index.cjs"
+  },
   "permissions": {
     "redis": true,
-    "reddit": true
+    "reddit": {
+      "enable": true,
+      "asUser": ["SUBMIT_POST", "SUBMIT_COMMENT"]
+    }
   },
   "triggers": {
     "onAppInstall": "/internal/onInstall"

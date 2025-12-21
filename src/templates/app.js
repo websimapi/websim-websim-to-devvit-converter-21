@@ -2,26 +2,24 @@ export const getMainTs = (title) => {
     const safeTitle = title.replace(/'/g, "\\'");
     return `
 import express from 'express';
-import { createServer, redis, reddit } from '@devvit/web/server';
+import { 
+    createServer, 
+    context, 
+    getServerPort, 
+    redis, 
+    reddit 
+} from '@devvit/web/server';
 
 const app = express();
+
+// Body parsers
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.text());
 
-// --- Helper to extract context from request headers ---
-function getContext(req) {
-    // Devvit sends context in headers with 'devvit-' prefix
-    const subredditName = req.headers['devvit-subreddit-name'];
-    const userId = req.headers['devvit-user'];
-    const username = req.headers['devvit-user-name'];
-    
-    return {
-        subredditName: subredditName || null,
-        userId: userId || null,
-        username: username || null
-    };
-}
+const router = express.Router();
 
-// --- Database Helper ---
+// --- Database Helpers ---
 const DB_REGISTRY_KEY = 'sys:registry';
 
 async function fetchAllData() {
@@ -34,11 +32,7 @@ async function fetchAllData() {
             const raw = await redis.hGetAll(colName);
             const parsed = {};
             for (const [k, v] of Object.entries(raw)) {
-                try { 
-                    parsed[k] = JSON.parse(v); 
-                } catch(e) { 
-                    parsed[k] = v; 
-                }
+                try { parsed[k] = JSON.parse(v); } catch(e) { parsed[k] = v; }
             }
             dbData[colName] = parsed;
         }));
@@ -50,13 +44,22 @@ async function fetchAllData() {
         };
         
         try {
-            const currUser = await reddit.getCurrentUser();
-            if (currUser) {
-                user = {
-                    id: currUser.id,
-                    username: currUser.username,
-                    avatar_url: currUser.snoovatarImage || user.avatar_url
+            // Try to get current user from context or Reddit API
+            if (context.userId) {
+                user = { 
+                    id: context.userId, 
+                    username: context.username || 'RedditUser',
+                    avatar_url: user.avatar_url 
                 };
+            } else {
+                const currUser = await reddit.getCurrentUser();
+                if (currUser) {
+                    user = {
+                        id: currUser.id,
+                        username: currUser.username,
+                        avatar_url: currUser.snoovatarImage || user.avatar_url
+                    };
+                }
             }
         } catch(e) { 
             console.warn('User fetch failed', e); 
@@ -69,14 +72,15 @@ async function fetchAllData() {
     }
 }
 
-// --- Routes ---
+// --- API Routes (Client -> Server) ---
+// Note: All client-callable endpoints must start with /api/
 
-app.get('/init', async (req, res) => {
+router.get('/api/init', async (_req, res) => {
     const data = await fetchAllData();
     res.json(data);
 });
 
-app.post('/save', async (req, res) => {
+router.post('/api/save', async (req, res) => {
     try {
         const { collection, key, value } = req.body;
         await redis.hSet(collection, { [key]: JSON.stringify(value) });
@@ -88,7 +92,7 @@ app.post('/save', async (req, res) => {
     }
 });
 
-app.post('/load', async (req, res) => {
+router.post('/api/load', async (req, res) => {
     try {
         const { collection, key } = req.body;
         const value = await redis.hGet(collection, key);
@@ -99,7 +103,7 @@ app.post('/load', async (req, res) => {
     }
 });
 
-app.post('/delete', async (req, res) => {
+router.post('/api/delete', async (req, res) => {
     try {
         const { collection, key } = req.body;
         await redis.hDel(collection, [key]);
@@ -110,30 +114,29 @@ app.post('/delete', async (req, res) => {
     }
 });
 
-// Internal Handlers
+// --- Internal Routes (Menu/Triggers) ---
+// Note: All internal endpoints must start with /internal/
 
-app.post('/internal/onInstall', async (req, res) => {
+router.post('/internal/onInstall', async (req, res) => {
     console.log('App installed!');
-    const context = getContext(req);
-    console.log('Installation context:', context);
     res.json({ success: true });
 });
 
-app.post('/internal/createPost', async (req, res) => {
+router.post('/internal/createPost', async (_req, res) => {
     console.log('Creating game post...');
     
     try {
-        // Extract context from request headers
-        const context = getContext(req);
-        console.log('Create Post Context:', context);
+        // Use the global context object from @devvit/web/server
+        const { subredditName } = context;
+        console.log('Context Subreddit:', subredditName);
 
-        if (!context.subredditName) {
-            throw new Error('Could not determine subreddit from request context. Headers: ' + JSON.stringify(req.headers));
+        if (!subredditName) {
+            return res.status(400).json({ error: 'Subreddit name is required' });
         }
 
         const post = await reddit.submitCustomPost({
             title: '${safeTitle}',
-            subredditName: context.subredditName,
+            subredditName: subredditName,
             entry: 'default', // matches devvit.json entrypoint
             userGeneratedContent: {
                 text: 'Play this game built with WebSim!'
@@ -150,8 +153,13 @@ app.post('/internal/createPost', async (req, res) => {
     }
 });
 
+app.use(router);
+
+const port = getServerPort();
 const server = createServer(app);
-export default server;
+
+server.on('error', (err) => console.error(\`server error; \${err.stack}\`));
+server.listen(port, () => console.log(\`Server listening on \${port}\`));
 `;
 };
 
