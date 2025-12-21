@@ -2,10 +2,24 @@ export const getMainTs = (title) => {
     const safeTitle = title.replace(/'/g, "\\'");
     return `
 import express from 'express';
-import { createServer, context, redis, reddit } from '@devvit/web/server';
+import { createServer, redis, reddit } from '@devvit/web/server';
 
 const app = express();
 app.use(express.json());
+
+// --- Helper to extract context from request headers ---
+function getContext(req) {
+    // Devvit sends context in headers with 'devvit-' prefix
+    const subredditName = req.headers['devvit-subreddit-name'];
+    const userId = req.headers['devvit-user'];
+    const username = req.headers['devvit-user-name'];
+    
+    return {
+        subredditName: subredditName || null,
+        userId: userId || null,
+        username: username || null
+    };
+}
 
 // --- Database Helper ---
 const DB_REGISTRY_KEY = 'sys:registry';
@@ -100,22 +114,26 @@ app.post('/delete', async (req, res) => {
 
 app.post('/internal/onInstall', async (req, res) => {
     console.log('App installed!');
+    const context = getContext(req);
+    console.log('Installation context:', context);
     res.json({ success: true });
 });
 
 app.post('/internal/createPost', async (req, res) => {
     console.log('Creating game post...');
+    
     try {
-        const { subredditName } = context;
-        console.log('Context Subreddit:', subredditName);
+        // Extract context from request headers
+        const context = getContext(req);
+        console.log('Create Post Context:', context);
 
-        if (!subredditName) {
-            throw new Error('Could not determine subreddit from context');
+        if (!context.subredditName) {
+            throw new Error('Could not determine subreddit from request context. Headers: ' + JSON.stringify(req.headers));
         }
 
         const post = await reddit.submitCustomPost({
             title: '${safeTitle}',
-            subredditName: subredditName,
+            subredditName: context.subredditName,
             entry: 'default', // matches devvit.json entrypoint
             userGeneratedContent: {
                 text: 'Play this game built with WebSim!'
