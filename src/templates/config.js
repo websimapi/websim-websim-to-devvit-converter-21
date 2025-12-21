@@ -36,7 +36,6 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
 export const generateDevvitJson = (slug) => JSON.stringify({
   "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
   "name": slug,
-  "version": "0.0.1",
   "server": {
     "entry": "src/server/index.ts"
   },
@@ -104,15 +103,31 @@ export default defineConfig({
   build: {
     outDir: '../../dist/client',
     emptyOutDir: true,
-    target: 'es2020', // Ensure broad compatibility without unsafe polyfills
-    minify: 'esbuild', 
+    target: 'es2020',
+    minify: 'esbuild',
+    // Increase the chunk size warning limit to 1000 KB to reduce noise
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         entryFileNames: "[name].js",
         chunkFileNames: "[name].js",
         assetFileNames: "[name][extname]",
+        // Manual chunking to split large dependencies
+        manualChunks(id) {
+          // Split Three.js into its own chunk if present
+          if (id.includes('node_modules/three')) {
+            return 'three';
+          }
+          // Split Remotion into its own chunk if present
+          if (id.includes('node_modules/remotion') || id.includes('node_modules/@remotion')) {
+            return 'remotion';
+          }
+          // Split React into its own chunk if present
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'react-vendor';
+          }
+        }
       },
-      // Ensure React is treated as a singleton
       external: [], 
     },
   },
