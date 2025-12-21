@@ -106,8 +106,10 @@ export { Player } from '@remotion/player';
     }
 
     // 4. Server Folder (src/server)
+    // Move server entry to src/main.ts to satisfy Devvit CLI expectations
+    srcFolder.file("main.ts", getMainTs(projectTitle));
+
     const serverFolder = srcFolder.folder("server");
-    serverFolder.file("index.ts", getMainTs(projectTitle));
     serverFolder.file("vite.config.ts", generateServerViteConfig());
     
     const blob = await zip.generateAsync({ type: "blob" });

@@ -147,7 +147,7 @@ export default defineConfig({
     noExternal: true,
   },
   build: {
-    ssr: 'index.ts',
+    ssr: '../main.ts',
     outDir: '../../dist/server',
     target: 'node22',
     sourcemap: true,
