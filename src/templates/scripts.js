@@ -207,8 +207,8 @@ try {
     // Verify Config
     if (fs.existsSync('devvit.json')) {
         const config = fs.readFileSync('devvit.json', 'utf8');
-        if (!config.includes('src/server/index.ts')) {
-             console.warn('⚠️  devvit.json might have incorrect server entry path.');
+        if (!config.includes('"entry": "index.cjs"')) {
+             console.warn('⚠️  devvit.json might have incorrect server entry path (expected "index.cjs").');
         }
     } else {
         console.warn('⚠️  devvit.json not found');
