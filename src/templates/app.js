@@ -107,6 +107,7 @@ app.post('/internal/createPost', async (req, res) => {
     console.log('Creating game post...');
     try {
         const { subredditName } = context;
+        console.log('Context Subreddit:', subredditName);
 
         if (!subredditName) {
             throw new Error('Could not determine subreddit from context');

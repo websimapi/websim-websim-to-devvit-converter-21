@@ -1,6 +1,6 @@
 export const generatePackageJson = (slug, dependencies = {}, devDependencies = {}) => JSON.stringify({
   "name": slug,
-  "version": "0.1.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -34,7 +34,7 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
 }, null, 2);
 
 export const generateDevvitYaml = (slug) => `name: ${slug}
-version: 0.1.0
+version: 0.0.1
 server:
   entry: dist/server/index.cjs
 post:
