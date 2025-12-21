@@ -1,4 +1,4 @@
-export const getServerMainJs = (title) => {
+export const getMainTs = (title) => {
     const safeTitle = title.replace(/'/g, "\\'");
     return `
 import express from 'express';

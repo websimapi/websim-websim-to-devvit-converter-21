@@ -20,21 +20,18 @@ function walk(dir, callback) {
 
 console.log('🔍 Verifying Project Integrity...');
 
-const SERVER_BUILD = './dist/server/index.cjs';
+const SERVER_BUILD = './dist/main.cjs';
 if (!fs.existsSync(SERVER_BUILD)) {
     console.error('❌ Server build missing at ' + SERVER_BUILD);
-    console.error('   Expected: dist/server/index.cjs');
+    console.error('   Expected: dist/main.cjs');
     if (fs.existsSync('./dist')) {
         console.log('   Contents of ./dist:', fs.readdirSync('./dist'));
-        if (fs.existsSync('./dist/server')) {
-             console.log('   Contents of ./dist/server:', fs.readdirSync('./dist/server'));
-        }
     } else {
         console.log('   Folder ./dist does not exist.');
     }
     console.error('   The app will fail to upload. Check "npm run build:server" output.');
 } else {
-    console.log('✅ Server build found at dist/server/index.cjs');
+    console.log('✅ Server build found at dist/main.cjs');
 }
 
 console.log('🔍 Verifying Webroot Integrity...');
@@ -200,7 +197,7 @@ try {
     execSync('npm run build', { stdio: 'inherit' });
     
     // Verify build output immediately
-    if (!fs.existsSync('dist/server/index.cjs')) {
+    if (!fs.existsSync('dist/main.cjs')) {
         console.error('❌ Server build file not found after build!');
         console.log('   Checking dist folder structure...');
         try {
@@ -213,7 +210,7 @@ try {
     // Verify Config
     if (fs.existsSync('devvit.yaml')) {
         const yaml = fs.readFileSync('devvit.yaml', 'utf8');
-        if (!yaml.includes('dist/server/index.cjs')) {
+        if (!yaml.includes('dist/main.cjs')) {
              console.warn('⚠️  devvit.yaml might have incorrect server entry path.');
         }
     } else {

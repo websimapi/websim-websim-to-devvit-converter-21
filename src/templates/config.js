@@ -36,7 +36,7 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
 export const generateDevvitYaml = (slug) => `name: ${slug}
 version: 0.0.1
 server:
-  entry: dist/server/index.cjs
+  entry: dist/main.cjs
 post:
   dir: webroot
   entrypoints:
@@ -148,8 +148,8 @@ export default defineConfig({
     noExternal: true,
   },
   build: {
-    ssr: 'src/server/index.ts',
-    outDir: 'dist/server',
+    ssr: 'src/main.ts',
+    outDir: 'dist',
     target: 'node20',
     sourcemap: true,
     emptyOutDir: true,
@@ -157,7 +157,7 @@ export default defineConfig({
       external: [...builtinModules],
       output: {
         format: 'cjs',
-        entryFileNames: 'index.cjs',
+        entryFileNames: 'main.cjs',
         inlineDynamicImports: true,
       },
     },

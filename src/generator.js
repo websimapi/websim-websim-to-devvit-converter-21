@@ -10,7 +10,7 @@ import {
     generateViteConfig,
     generateServerViteConfig,
     tsConfig,
-    getServerMainJs,
+    getMainTs,
     simpleLoggerJs,
     websimSocketPolyfill,
     websimStubsJs,
@@ -141,7 +141,7 @@ export { Player } from '@remotion/player';
 
     // 5. Server Code (Redis/API) - Express Server
     // We use .ts to satisfy Devvit CLI expectations, though content is valid JS.
-    zip.file("src/server/index.ts", getServerMainJs(projectTitle));
+    zip.file("src/main.ts", getMainTs(projectTitle));
     
 
 
