@@ -208,13 +208,13 @@ try {
     }
 
     // Verify Config
-    if (fs.existsSync('devvit.yaml')) {
-        const yaml = fs.readFileSync('devvit.yaml', 'utf8');
-        if (!yaml.includes('dist/server/index.cjs') && !yaml.includes('index.cjs')) {
-             console.warn('⚠️  devvit.yaml might have incorrect server entry path.');
+    if (fs.existsSync('devvit.json')) {
+        const config = fs.readFileSync('devvit.json', 'utf8');
+        if (!config.includes('src/server/index.ts')) {
+             console.warn('⚠️  devvit.json might have incorrect server entry path.');
         }
     } else {
-        console.warn('⚠️  devvit.yaml not found (Did you mean to use YAML?)');
+        console.warn('⚠️  devvit.json not found');
     }
 
 } catch(e) {

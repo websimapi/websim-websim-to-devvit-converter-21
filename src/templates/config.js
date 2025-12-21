@@ -33,29 +33,40 @@ export const generatePackageJson = (slug, dependencies = {}, devDependencies = {
   }
 }, null, 2);
 
-export const generateDevvitYaml = (slug) => `name: ${slug}
-version: 0.0.1
-server:
-  dir: dist/server
-  entry: index.cjs
-post:
-  dir: dist/client
-  entrypoints:
-    default:
-      entry: index.html
-      height: tall
-permissions:
-  redis: true
-  reddit: true
-triggers:
-  onAppInstall: /internal/onInstall
-menu:
-  items:
-    - label: Add Game Post
-      location: subreddit
-      forUserType: moderator
-      endpoint: /internal/createPost
-`;
+export const generateDevvitJson = (slug) => JSON.stringify({
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": slug,
+  "version": "0.0.1",
+  "server": {
+    "entry": "src/server/index.ts"
+  },
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "entry": "index.html",
+        "height": "tall"
+      }
+    }
+  },
+  "permissions": {
+    "redis": true,
+    "reddit": true
+  },
+  "triggers": {
+    "onAppInstall": "/internal/onInstall"
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "Add Game Post",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/createPost"
+      }
+    ]
+  }
+}, null, 2);
 
 export const generateClientViteConfig = ({ hasReact = false, hasRemotion = false } = {}) => `
 import { defineConfig } from 'vite';
@@ -147,7 +158,7 @@ export default defineConfig({
     noExternal: true,
   },
   build: {
-    ssr: '../main.ts',
+    ssr: 'index.ts',
     outDir: '../../dist/server',
     target: 'node22',
     sourcemap: true,

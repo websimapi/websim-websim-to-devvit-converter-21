@@ -6,7 +6,7 @@ import {
 
 import {
     generatePackageJson,
-    generateDevvitYaml,
+    generateDevvitJson,
     generateClientViteConfig,
     generateServerViteConfig,
     tsConfig,
@@ -71,7 +71,7 @@ export async function generateDevvitZip(projectMeta, assets, includeReadme = tru
     }
 
     zip.file("package.json", generatePackageJson(projectSlug, analyzer.dependencies, extraDevDeps));
-    zip.file("devvit.yaml", generateDevvitYaml(projectSlug));
+    zip.file("devvit.json", generateDevvitJson(projectSlug));
     zip.file("tsconfig.json", tsConfig);
     zip.file(".gitignore", "node_modules\n.devvit\ndist"); 
 
@@ -106,10 +106,8 @@ export { Player } from '@remotion/player';
     }
 
     // 4. Server Folder (src/server)
-    // Move server entry to src/main.ts to satisfy Devvit CLI expectations
-    srcFolder.file("main.ts", getMainTs(projectTitle));
-
     const serverFolder = srcFolder.folder("server");
+    serverFolder.file("index.ts", getMainTs(projectTitle));
     serverFolder.file("vite.config.ts", generateServerViteConfig());
     
     const blob = await zip.generateAsync({ type: "blob" });
