@@ -37,7 +37,8 @@ export const generateDevvitJson = (slug) => JSON.stringify({
   "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
   "name": slug,
   "server": {
-    "entry": "src/server/index.ts"
+    "dir": "dist/server",
+    "entry": "index.cjs"
   },
   "post": {
     "dir": "dist/client",
